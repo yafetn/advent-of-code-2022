@@ -46,39 +46,72 @@ data class Play(
 
 data class Round(
     val player1: Play,
-    val player2: Play,
+    var player2: Play? = null,
+    val result: Result,
     var scores: Pair<Int, Int>? = null
 ) {
     init {
+        determinePlayer2()
         scoreRound()
     }
 
     private fun scoreRound() {
         var first = player1.option.value
-        var second = player2.option.value
+        var second = player2?.option?.value
 
-        if (player1 > player2) {
+        if (player1 > player2!!) {
             first += Result.BEATS.value
-        } else if (player1 < player2) {
-            second += Result.BEATS.value
+        } else if (player1 < player2!!) {
+            second = second!! + Result.BEATS.value
         } else {
             first += Result.DRAWS.value
-            second += Result.DRAWS.value
+            second = second!! + Result.DRAWS.value
         }
 
-        scores = first to second
+        scores = first to second!!
+    }
+
+    private fun determinePlayer2() {
+        var res: Play?
+
+        when (player1.option) {
+            Options.ROCK -> {
+                res = when (result) {
+                    Result.BEATS -> Play(Options.PAPER)
+                    Result.DRAWS -> Play(Options.ROCK)
+                    Result.LOSES -> Play(Options.SCISSORS)
+                }
+            }
+            Options.PAPER -> {
+                res = when (result) {
+                    Result.BEATS -> Play(Options.SCISSORS)
+                    Result.DRAWS -> Play(Options.PAPER)
+                    Result.LOSES -> Play(Options.ROCK)
+                }
+            }
+            else -> {
+                res = when (result) {
+                    Result.BEATS -> Play(Options.ROCK)
+                    Result.DRAWS -> Play(Options.SCISSORS)
+                    Result.LOSES -> Play(Options.PAPER)
+                }
+            }
+        }
+
+        player2 = res
     }
 }
 
-val map = mapOf(
+val letterToOption = mapOf(
     "A" to Options.ROCK,
-    "X" to Options.ROCK,
-
     "B" to Options.PAPER,
-    "Y" to Options.PAPER,
-
     "C" to Options.SCISSORS,
-    "Z" to Options.SCISSORS
+)
+
+val letterToResult = mapOf(
+    "X" to Result.LOSES,
+    "Y" to Result.DRAWS,
+    "Z" to Result.BEATS,
 )
 
 fun main() {
@@ -87,17 +120,15 @@ fun main() {
             val plays = it.split(" ")
             Round(
                 player1 = Play(
-                    option = map[plays[0]]!!
+                    option = letterToOption[plays[0]]!!
                 ),
-                player2 = Play(
-                    option = map[plays[1]]!!
-                    )
+                result = letterToResult[plays[1]]!!
             )
         }
 
-        return scoredRounds.map {
+        return scoredRounds.sumOf {
             it.scores!!.second
-        }.sum()
+        }
 
     }
 
