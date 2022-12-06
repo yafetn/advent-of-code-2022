@@ -26,10 +26,33 @@ fun main() {
 
     }
 
+    fun findBadgeLetter(group: List<String>): Char {
+        var result = ' '
+        for (char in group[0]) {
+            if (group.all { char in it }) {
+                result = char
+            }
+        }
+
+        return result
+    }
+
     fun part2(input: List<String>): Int {
-        TODO()
+        val priorities = mutableListOf<Int>()
+
+        val chunkedInput = input.chunked(3)
+
+        chunkedInput.map {
+            val badgeLetter = findBadgeLetter(it)
+            charToPriority[badgeLetter]!!
+        }.forEach {
+            priorities.add(it)
+        }
+
+        return priorities.sum()
     }
 
     val testInput = readInput("Day03")
     println(part1(testInput))
+    println(part2(testInput))
 }
