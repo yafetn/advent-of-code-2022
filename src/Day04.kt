@@ -29,10 +29,20 @@ fun main() {
 
 
     fun part2(input: List<String>): Int {
-        TODO()
+        val rangePairs = inputToRanges(input = input)
+        var counter = 0
+
+        for (rangePair in rangePairs) {
+            if ((rangePair.first.first in rangePair.second || rangePair.first.last in rangePair.second) ||
+                rangePair.second.first in rangePair.first || rangePair.second.last in rangePair.first) {
+                counter++
+            }
+        }
+
+        return counter
     }
 
     val testInput = readInput("Day04")
     println(part1(testInput))
-    // println(part2(testInput))
+    println(part2(testInput))
 }
