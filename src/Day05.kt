@@ -31,7 +31,11 @@ fun main() {
         return result
     }
 
-    fun craneParser(stacks: Array<ArrayDeque<String>>, input: List<String>): Array<ArrayDeque<String>> {
+    fun craneParser(
+        stacks: Array<ArrayDeque<String>>,
+        input: List<String>,
+        craneVersion: String = "9000"
+    ): Array<ArrayDeque<String>> {
         val craneStrings = input.filter {
             it.startsWith("move")
         }
@@ -47,9 +51,21 @@ fun main() {
             scanner.next("to")
             val destStack = scanner.nextInt()
 
-            repeat(cratesToMove) {
-                stacks[destStack - 1].addLast(
-                    stacks[sourceStack - 1].removeLast()
+            if (craneVersion == "9000") {
+                repeat(cratesToMove) {
+                    stacks[destStack - 1].addLast(
+                        stacks[sourceStack - 1].removeLast()
+                    )
+                }
+            } else {
+                val toMove = ArrayDeque<String>()
+                repeat(cratesToMove) {
+                    toMove.addFirst(
+                        stacks[sourceStack - 1].removeLast()
+                    )
+                }
+                stacks[destStack - 1].addAll(
+                    toMove
                 )
             }
 
@@ -75,11 +91,24 @@ fun main() {
     }
 
 
-    fun part2(input: List<String>): Int {
-        TODO()
+    fun part2(input: List<String>): String {
+        val stacks = stackParser(input)
+        val finalStacks = craneParser(
+            stacks = stacks,
+            input = input,
+            craneVersion = "9001"
+        )
+
+        var tops = ""
+
+        for (stack in finalStacks) {
+            tops += stack.removeLast()
+        }
+
+        return tops
     }
 
     val testInput = readInput("Day05")
     println(part1(testInput))
-    //println(part2(testInput))
+    println(part2(testInput))
 }
