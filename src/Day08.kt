@@ -1,3 +1,5 @@
+import kotlin.math.max
+
 data class Tree(
     val height: Int,
     val top: Tree? = null,
@@ -41,7 +43,7 @@ fun main() {
     fun updateVisibility(patch: Patch) {
         val trees = patch.trees
 
-        for ((i, treeLine) in trees.withIndex()) {
+        for (treeLine in trees) {
             for ((j, tree) in treeLine.withIndex()) {
                 if (tree.isVisible) continue
 
@@ -82,10 +84,68 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        TODO()
+        val patch = parsePatch(
+            input = input
+        )
+        updateVisibility(patch)
+
+        val scenicScores = mutableListOf<Int>()
+
+        for (i in patch.trees) {
+            for (j in i) {
+                if (j.top == null || j.bottom == null || j.right == null || j.left == null) continue
+
+                var (topScenic, bottomScenic, leftScenic, rightScenic) = Array(4) { 0 }
+
+                var curr: Tree? = j.top
+                while (curr != null) {
+                    topScenic += 1
+                    if (curr!!.height < j.height) {
+                        curr = curr!!.top
+                    } else {
+                        break
+                    }
+                }
+
+                curr = j.bottom
+                while (curr != null) {
+                    bottomScenic += 1
+                    if (curr!!.height < j.height) {
+                        curr = curr!!.bottom
+                    } else {
+                        break
+                    }
+                }
+
+                curr = j.left
+                while (curr != null) {
+                    leftScenic += 1
+                    if (curr!!.height < j.height) {
+                        curr = curr!!.left
+                    } else {
+                        break
+                    }
+                }
+
+                curr = j.right
+                while (curr != null) {
+                    rightScenic += 1
+                    if (curr!!.height < j.height) {
+                        curr = curr!!.right
+                    } else {
+                        break
+                    }
+                }
+
+                val treeScenic = topScenic * bottomScenic * leftScenic * rightScenic
+
+                scenicScores.add(treeScenic)
+            }
+        }
+        return scenicScores.max()
     }
 
     val testInput = readInput("Day08")
     println(part1(testInput))
-    // println(part2(testInput))
+    println(part2(testInput))
 }
