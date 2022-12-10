@@ -11,11 +11,13 @@ data class Directory(
     var size: Int? = 0
 )
 
-fun inputParser(input: List<String>): Directory {
+fun inputParser(input: List<String>): Pair<Directory, MutableMap<String, Int>> {
     val rootDirectory = Directory(
         name = "/",
         parent = null
     )
+
+    val dirMap = mutableMapOf<String, Int>()
 
     var currentDirectory = rootDirectory
 
@@ -43,7 +45,9 @@ fun inputParser(input: List<String>): Directory {
                     Directory(
                         parent = currentDirectory,
                         name = line.split(" ")[1]
-                    )
+                    ).also {
+                        dirMap[it.name + it.parent!!.name] = it.size!!
+                    }
                 )
             }
 
@@ -57,28 +61,25 @@ fun inputParser(input: List<String>): Directory {
                     )
                 )
                 currentDirectory.size = currentDirectory.size?.plus(size.toInt())
-                recalcSize(currentDirectory)
-
+                dirMap["${currentDirectory.name}${currentDirectory.parent?.name ?: ""}"] = currentDirectory.size!!
+                recalcSize(currentDirectory, dirMap)
             }
         }
     }
-
-    return rootDirectory
+    dirMap[rootDirectory.name] = rootDirectory.size!!
+    return rootDirectory to dirMap
 }
 
 fun findDirectory(name: String, currentDirectory: Directory): Directory? {
     return currentDirectory.directories?.find { it.name == name }
 }
 
-fun recalcSize(current: Directory?) {
+fun recalcSize(current: Directory?, dirMap: MutableMap<String, Int>) {
     var curr = current?.parent
 
     while (curr != null ) {
-        curr.size = curr.directories?.sumOf { it.size!! }?.let {
-            curr!!.size?.plus(
-                it
-            )
-        }
+        curr.size = curr.directories?.sumOf { it.size!! }?.plus(curr.files?.sumOf { it.size }!!)
+        dirMap["${curr.name}${curr.parent?.name ?: ""}"] = curr.size!!
         curr = curr.parent
     }
 }
@@ -86,23 +87,11 @@ fun recalcSize(current: Directory?) {
 
 fun main() {
     fun part1(input: List<String>): Int {
-        val rootDirectory = inputParser(input)
+        val (_, dirMap) = inputParser(input)
 
+        val dirsUnderLimit = dirMap.filter { it.value <= 100_000 }
 
-
-//        var dirsUnderLimit = rootDirectory.directories?.flatMap {
-//            it.directories!!.flatMap {
-//                it.directories!!.flatMap {
-//                    it.directories!!
-//                }
-//            }
-//        }?.toMutableList()
-
-        if (rootDirectory.size!! <= 100_000) if (dirsUnderLimit != null) {
-            dirsUnderLimit += rootDirectory
-        }
-
-        return dirsUnderLimit?.sumOf { it.size!! } ?: 0
+        return dirsUnderLimit.values.sum()
     }
 
     fun part2(input: List<String>): Int {
@@ -113,4 +102,3 @@ fun main() {
     println(part1(testInput))
     // println(part2(testInput))
 }
-
