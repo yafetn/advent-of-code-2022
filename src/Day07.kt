@@ -95,10 +95,20 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        TODO()
+        val totalAvail = 70_000_000
+        val updateNeeds = 30_000_000
+
+        val (root, dirMap) = inputParser(input)
+
+        val totalUsed = root.size!!
+        val toFreeNeeded = updateNeeds - (totalAvail - totalUsed)
+
+        val smallestPossibleDeletion = dirMap.filterValues { it >= toFreeNeeded }.minBy { it.value }
+
+        return smallestPossibleDeletion.value
     }
 
     val testInput = readInput("Day07")
     println(part1(testInput))
-    // println(part2(testInput))
+    println(part2(testInput))
 }
